@@ -8,10 +8,15 @@ load test_helper
     README.tsx \
     README.md \
     CONTRIBUTING.md \
+    .mise/tasks/new \
+    .mise/tasks/mine \
+    .mise/tasks/list \
+    .mise/tasks/show \
+    .mise/tasks/path \
     .mise/tasks/test \
     .mise/tasks/doctor \
     .github/workflows/test.yml \
-    lib/.gitkeep
+    lib/desks.sh
   do
     [ -e "$REPO_DIR/$path" ]
   done

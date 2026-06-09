@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+#MISE description="Print a desk root path"
+#USAGE arg "<id>" help="Desk id"
+#USAGE example "desks path desk-demo" header="Print a desk root"
+set -euo pipefail
+
+source "$MISE_CONFIG_ROOT/lib/desks.sh"
+
+desks_path "$usage_id"

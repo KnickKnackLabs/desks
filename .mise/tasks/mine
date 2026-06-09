@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+#MISE description="Show the current desk"
+#USAGE flag "--json" default=#false help="Print registry JSON instead of root path"
+#USAGE example "desks mine" header="Print the current desk root"
+#USAGE example "desks mine --json" header="Print the current desk registry"
+set -euo pipefail
+
+source "$MISE_CONFIG_ROOT/lib/desks.sh"
+
+desks_mine "${usage_json:-false}"
