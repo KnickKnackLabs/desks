@@ -1,7 +1,8 @@
 # Contributing to desks
 
-`desks` is being prepared as a KnickKnackLabs tool repo for the desks lane.
-This initial state is infrastructure only: product behavior, command names, and workflow semantics still belong to the desks lead/sibling.
+`desks` creates and discovers bounded filesystem work surfaces.
+
+The first behavior slice is intentionally generic: desks have ids, roots, and minimal registry metadata. Core `desks` does not know about agents, sessions, homes, briefs, `chat`, or fold harvest policy.
 
 ## Structure
 
@@ -11,9 +12,14 @@ desks/
 ├── README.tsx             # Source for generated README.md
 ├── README.md              # Generated; keep in sync with README.tsx
 ├── CONTRIBUTING.md        # Repo orientation surface
+├── .mise/tasks/new        # Create a desk
+├── .mise/tasks/mine       # Resolve the current desk
+├── .mise/tasks/list       # List accessible desks
+├── .mise/tasks/show       # Show desk registry metadata
+├── .mise/tasks/path       # Print a desk root path
 ├── .mise/tasks/test       # Canonical BATS runner
 ├── .mise/tasks/doctor     # Local health checks + optional hook status
-├── lib/                   # Shared runtime code once multiple tasks need it
+├── lib/desks.sh           # Shared task logic
 └── test/                  # BATS tests and helpers
 ```
 
@@ -46,15 +52,30 @@ readme build --check
 
 CI also checks that `README.md` matches `README.tsx`.
 
-## Product boundary
+## Core boundary
 
-Do not treat this skeleton as approval for a specific desks product shape.
-Before adding real behavior, start from the desks concept owner/lead handoff and agree on the first workflow slice.
+Keep core `desks` generic.
+
+Do not add agent, session, home, brief, or transport semantics to core metadata just because a current caller happens to be an agent workflow. Higher-level tools can create their own files under a desk or maintain their own metadata keyed by desk id.
+
+Current MVP registry shape:
+
+```json
+{
+  "schema": 1,
+  "id": "demo",
+  "root": "/path/to/demo",
+  "created_at": "2026-06-07T03:15:00Z"
+}
+```
+
+If you want to add a field, first ask whether it belongs to core desks or to a caller/provisioner layer.
 
 ## Validation before merge
 
 ```bash
 mise run test
+mise run doctor
 codebase lint "$PWD"
 readme build --check
 git diff --check

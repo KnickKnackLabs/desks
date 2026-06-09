@@ -29,8 +29,8 @@ import {
 
 const PROJECT = {
   name: "desks",
-  oneLine: "A prepared KKL tool repo for the desks lane.",
-  tagline: "The room is wired; the workbench is still intentionally empty.",
+  oneLine: "Create and discover bounded working surfaces.",
+  tagline: "A desk is a place to work, not a theory of who sits there.",
   license: "MIT",
 };
 
@@ -131,6 +131,11 @@ const scaffold = [
   ["mise.toml", "tools, settings, and codebase lint config"],
   ["README.tsx", "programmable README source"],
   ["CONTRIBUTING.md", "repo-entry orientation surface"],
+  [".mise/tasks/new", "create a desk"],
+  [".mise/tasks/mine", "resolve the current desk"],
+  [".mise/tasks/list", "list accessible desks"],
+  [".mise/tasks/show", "show a desk registry"],
+  [".mise/tasks/path", "print a desk root"],
   [".mise/tasks/test", "canonical BATS runner"],
   [".mise/tasks/doctor", "local health check plus hook hint"],
   [".github/workflows/test.yml", "Ubuntu/macOS CI"],
@@ -163,29 +168,36 @@ const readme = (
     <Section title="What this is">
       <Paragraph>
         <Code>desks</Code>
-        {" is currently infrastructure-only repo prep for the desks lane: mise-managed tasks, BATS tests, codebase convention lints, generated README, CI, and a "}
-        <Code>doctor</Code>
-        {" task that tells you whether your clone has the optional local pre-commit hook installed."}
+        {" creates small, discoverable filesystem work surfaces. A desk has an id, a root path, and a tiny "}
+        <Code>.desk/registry.json</Code>
+        {" file. Higher-level tools can decide whether that surface belongs to an agent, a shell, a project, or something else."}
       </Paragraph>
 
       <Paragraph>
-        {"It intentionally does "}
-        <Bold>not</Bold>
-        {" define the desks product behavior yet. The desks lead/sibling owns that direction; this repo just makes the empty room safe to work in."}
+        {"The first slice is intentionally generic: create desks, find the current desk, list accessible desks, inspect a registry, and print a desk path. Briefs, agent-home preparation, session launch, and fold harvest policy stay outside core for now."}
       </Paragraph>
     </Section>
 
     <Section title="Quick start">
-      <CodeBlock lang="bash">{`gh repo clone KnickKnackLabs/desks
+      <CodeBlock lang="bash">{`# Intended installed usage after desks is registered with shiv:
+# [tools]
+# "shiv:desks" = "0.1"
+# Then, after mise install, use the installed shim:
+export DESKS_ROOT=/tmp/desks-demo
+desk=$(desks new --id demo)
+DESK_ROOT="$desk" desks mine
+DESK_ROOT="$desk" desks mine --json
+
+desks list
+desks show demo
+desks path demo
+
+# Contributing to this repo still uses mise:
+gh repo clone KnickKnackLabs/desks
 cd desks
-
-mise trust
-mise install
+mise trust && mise install
 mise run test
-mise run doctor
-
-# Optional local safety net: installs .git/hooks/pre-commit.d/codebase
-codebase pre-commit`}</CodeBlock>
+mise run doctor`}</CodeBlock>
     </Section>
 
     <Section title="Goodies baked in">
@@ -195,6 +207,11 @@ codebase pre-commit`}</CodeBlock>
           <Cell>Why it exists</Cell>
           <Cell>Where</Cell>
         </TableHead>
+        <TableRow>
+          <Cell>Generic core</Cell>
+          <Cell>Core metadata does not know about agents, sessions, homes, briefs, or chat.</Cell>
+          <Cell><Code>.desk/registry.json</Code></Cell>
+        </TableRow>
         <TableRow>
           <Cell>Generated README</Cell>
           <Cell>TSX can count tests, list tasks, and keep docs honest in CI.</Cell>
@@ -255,13 +272,13 @@ codebase pre-commit`}</CodeBlock>
       </Table>
     </Section>
 
-    <Section title="When product work starts">
+    <Section title="Core boundary">
       <List ordered>
-        <Item>Keep the first behavior slice small enough to validate with BATS.</Item>
-        <Item>Add real task files under <Code>.mise/tasks/</Code>; use <Code>$MISE_CONFIG_ROOT</Code> inside tasks only.</Item>
-        <Item>Put shared Bash helpers in <Code>lib/</Code> only once multiple tasks need them.</Item>
-        <Item>If the installed tool resolves caller-relative paths, read the shiv-provided <Code>DESKS_CALLER_PWD</Code> variable, not generic <Code>CALLER_PWD</Code>.</Item>
-        <Item>Update this README from repo-prep language to actual user workflows once those workflows exist.</Item>
+        <Item><Code>desks</Code> owns desk ids, roots, discovery, and minimal registry metadata.</Item>
+        <Item>It does not own agent identity, session identity, home checkout preparation, desk briefs, <Code>chat</Code> transport, or fold harvest policy.</Item>
+        <Item>Callers can put their own files under a desk after creating it.</Item>
+        <Item>Installed usage goes through the shiv-provided <Code>desks</Code> shim; repo tests use <Code>mise run</Code> only to exercise that task path locally.</Item>
+        <Item>Tasks use <Code>$MISE_CONFIG_ROOT</Code> inside the repo and <Code>DESKS_CALLER_PWD</Code> for caller-cwd discovery from the installed shim.</Item>
       </List>
     </Section>
 
@@ -298,7 +315,7 @@ git diff --check`}</CodeBlock>
         <Link href="https://github.com/KnickKnackLabs/readme">KnickKnackLabs/readme</Link>
         {"."}
         <Raw>{"<br />"}</Raw>
-        {"A wired room is not a product, but it is a better place to start one."}
+        {"A desk is useful before it knows who will sit down."}
       </Sub>
     </Center>
   </>

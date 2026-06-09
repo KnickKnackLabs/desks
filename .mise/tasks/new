@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+#MISE description="Create a desk"
+#USAGE flag "--id <id>" default="" help="Desk id; generated when omitted"
+#USAGE example "desks new" header="Create a desk with a generated id"
+#USAGE example "desks new --id desk-demo" header="Create a desk with an explicit id"
+set -euo pipefail
+
+source "$MISE_CONFIG_ROOT/lib/desks.sh"
+
+desks_new "${usage_id:-}"

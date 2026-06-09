@@ -2,12 +2,12 @@
 
 # desks
 
-**A prepared KKL tool repo for the desks lane.**
+**Create and discover bounded working surfaces.**
 
-The room is wired; the workbench is still intentionally empty.
+A desk is a place to work, not a theory of who sits there.
 
 ![shape: mise + BATS](https://img.shields.io/badge/shape-mise%20%2B%20BATS-4EAA25?style=flat&logo=gnubash&logoColor=white)
-[![tests: 3](https://img.shields.io/badge/tests-3-brightgreen?style=flat)](test/)
+[![tests: 12](https://img.shields.io/badge/tests-12-brightgreen?style=flat)](test/)
 ![lints: 9](https://img.shields.io/badge/lints-9-blue?style=flat)
 ![README: TSX](https://img.shields.io/badge/README-TSX-f472b6?style=flat)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue?style=flat)](LICENSE)
@@ -18,29 +18,39 @@ The room is wired; the workbench is still intentionally empty.
 
 ## What this is
 
-`desks` is currently infrastructure-only repo prep for the desks lane: mise-managed tasks, BATS tests, codebase convention lints, generated README, CI, and a `doctor` task that tells you whether your clone has the optional local pre-commit hook installed.
+`desks` creates small, discoverable filesystem work surfaces. A desk has an id, a root path, and a tiny `.desk/registry.json` file. Higher-level tools can decide whether that surface belongs to an agent, a shell, a project, or something else.
 
-It intentionally does **not** define the desks product behavior yet. The desks lead/sibling owns that direction; this repo just makes the empty room safe to work in.
+The first slice is intentionally generic: create desks, find the current desk, list accessible desks, inspect a registry, and print a desk path. Briefs, agent-home preparation, session launch, and fold harvest policy stay outside core for now.
 
 ## Quick start
 
 ```bash
+# Intended installed usage after desks is registered with shiv:
+# [tools]
+# "shiv:desks" = "0.1"
+# Then, after mise install, use the installed shim:
+export DESKS_ROOT=/tmp/desks-demo
+desk=$(desks new --id demo)
+DESK_ROOT="$desk" desks mine
+DESK_ROOT="$desk" desks mine --json
+
+desks list
+desks show demo
+desks path demo
+
+# Contributing to this repo still uses mise:
 gh repo clone KnickKnackLabs/desks
 cd desks
-
-mise trust
-mise install
+mise trust && mise install
 mise run test
 mise run doctor
-
-# Optional local safety net: installs .git/hooks/pre-commit.d/codebase
-codebase pre-commit
 ```
 
 ## Goodies baked in
 
 | Goodie            | Why it exists                                                                                            | Where                        |
 | ----------------- | -------------------------------------------------------------------------------------------------------- | ---------------------------- |
+| Generic core      | Core metadata does not know about agents, sessions, homes, briefs, or chat.                              | `.desk/registry.json`        |
 | Generated README  | TSX can count tests, list tasks, and keep docs honest in CI.                                             | `README.tsx`                 |
 | Doctor hook check | Local pre-commit hooks are clone-local, so the repo can report them without pretending they are tracked. | `mise run doctor`            |
 | Convention lints  | Best-practice drift gets caught as code, not folklore.                                                   | `[_.codebase].lint`          |
@@ -54,6 +64,11 @@ codebase pre-commit
 | `mise.toml`                  | ✓      | tools, settings, and codebase lint config   |
 | `README.tsx`                 | ✓      | programmable README source                  |
 | `CONTRIBUTING.md`            | ✓      | repo-entry orientation surface              |
+| `.mise/tasks/new`            | ✓      | create a desk                               |
+| `.mise/tasks/mine`           | ✓      | resolve the current desk                    |
+| `.mise/tasks/list`           | ✓      | list accessible desks                       |
+| `.mise/tasks/show`           | ✓      | show a desk registry                        |
+| `.mise/tasks/path`           | ✓      | print a desk root                           |
 | `.mise/tasks/test`           | ✓      | canonical BATS runner                       |
 | `.mise/tasks/doctor`         | ✓      | local health check plus hook hint           |
 | `.github/workflows/test.yml` | ✓      | Ubuntu/macOS CI                             |
@@ -65,15 +80,20 @@ codebase pre-commit
 | Task              | Description                   |
 | ----------------- | ----------------------------- |
 | `mise run doctor` | Check local development setup |
+| `mise run list`   | List accessible desks         |
+| `mise run mine`   | Show the current desk         |
+| `mise run new`    | Create a desk                 |
+| `mise run path`   | Print a desk root path        |
+| `mise run show`   | Show desk registry metadata   |
 | `mise run test`   | Run BATS tests                |
 
-## When product work starts
+## Core boundary
 
-1. Keep the first behavior slice small enough to validate with BATS.
-2. Add real task files under `.mise/tasks/`; use `$MISE_CONFIG_ROOT` inside tasks only.
-3. Put shared Bash helpers in `lib/` only once multiple tasks need them.
-4. If the installed tool resolves caller-relative paths, read the shiv-provided `DESKS_CALLER_PWD` variable, not generic `CALLER_PWD`.
-5. Update this README from repo-prep language to actual user workflows once those workflows exist.
+1. `desks` owns desk ids, roots, discovery, and minimal registry metadata.
+2. It does not own agent identity, session identity, home checkout preparation, desk briefs, `chat` transport, or fold harvest policy.
+3. Callers can put their own files under a desk after creating it.
+4. Installed usage goes through the shiv-provided `desks` shim; repo tests use `mise run` only to exercise that task path locally.
+5. Tasks use `$MISE_CONFIG_ROOT` inside the repo and `DESKS_CALLER_PWD` for caller-cwd discovery from the installed shim.
 
 <details>
 <summary><b>Current convention checks</b></summary>
@@ -103,12 +123,12 @@ readme build --check
 git diff --check
 ```
 
-The starter suite currently has **3 tests** and **2 public tasks**. Those numbers are read from the repo at README build time.
+The starter suite currently has **12 tests** and **7 public tasks**. Those numbers are read from the repo at README build time.
 
 <div align="center">
 
 ---
 
 <sub>
-This README was generated from `README.tsx` with [KnickKnackLabs/readme](https://github.com/KnickKnackLabs/readme).<br />A wired room is not a product, but it is a better place to start one.
+This README was generated from `README.tsx` with [KnickKnackLabs/readme](https://github.com/KnickKnackLabs/readme).<br />A desk is useful before it knows who will sit down.
 </sub></div>

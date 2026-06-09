@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+#MISE description="List accessible desks"
+#USAGE flag "--json" default=#false help="Print registry JSON array"
+#USAGE example "desks list" header="List desk ids"
+#USAGE example "desks list --json" header="List desk registries"
+set -euo pipefail
+
+source "$MISE_CONFIG_ROOT/lib/desks.sh"
+
+desks_list "${usage_json:-false}"

@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+#MISE description="Show desk registry metadata"
+#USAGE arg "<id>" help="Desk id"
+#USAGE example "desks show desk-demo" header="Show desk JSON metadata"
+set -euo pipefail
+
+source "$MISE_CONFIG_ROOT/lib/desks.sh"
+
+desks_show "$usage_id"
