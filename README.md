@@ -7,8 +7,8 @@
 A desk is a place to work, not a theory of who sits there.
 
 ![shape: mise + BATS](https://img.shields.io/badge/shape-mise%20%2B%20BATS-4EAA25?style=flat&logo=gnubash&logoColor=white)
-[![tests: 12](https://img.shields.io/badge/tests-12-brightgreen?style=flat)](test/)
-![lints: 9](https://img.shields.io/badge/lints-9-blue?style=flat)
+[![tests: 15](https://img.shields.io/badge/tests-15-brightgreen?style=flat)](test/)
+![lints: 17](https://img.shields.io/badge/lints-17-blue?style=flat)
 ![README: TSX](https://img.shields.io/badge/README-TSX-f472b6?style=flat)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue?style=flat)](LICENSE)
 
@@ -101,15 +101,23 @@ mise run doctor
 This repo currently asks [codebase](https://github.com/KnickKnackLabs/codebase) to run these lint rules:
 
 ```
+shellcheck
+or-true
+bash-empty-argv-forwarding
+bash-empty-array-expansions
+exec-stderr-persistence
+gum-table
 mise-settings
+mise-usage-examples
+variadic-args
+mcr-scope
 bats-test-helper
 bats-test-task
-mcr-scope
-or-true
-shellcheck
-gum-table
-caller-pwd-contract
+bats-public-task-path
 github-actions
+ci-lint-enforcement
+caller-pwd-contract
+mise-shiv-plugin
 ```
 
 </details>
@@ -123,7 +131,7 @@ readme build --check
 git diff --check
 ```
 
-The starter suite currently has **12 tests** and **7 public tasks**. Those numbers are read from the repo at README build time.
+The starter suite currently has **15 tests** and **7 public tasks**. Those numbers are read from the repo at README build time.
 
 <div align="center">
 

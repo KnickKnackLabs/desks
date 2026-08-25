@@ -5,9 +5,12 @@
 #USAGE example "mise run test" header="Run all tests"
 #USAGE example "mise run test skeleton" header="Run a specific suite by name"
 #USAGE example "mise run test --filter doctor" header="Filter tests by name"
+#USAGE example "mise run test --jobs 4" header="Run isolated tests in parallel"
 set -euo pipefail
 
 TEST_DIR="$MISE_CONFIG_ROOT/test"
+parallel_command="${RUSH_COMMAND:-rush}"
+export BATS_PARALLEL_BINARY_NAME="${BATS_PARALLEL_BINARY_NAME:-$parallel_command}"
 
 args=()
 if [ -n "${usage_args:-}" ]; then
@@ -34,4 +37,38 @@ if ! $has_target; then
   resolved+=("$TEST_DIR/")
 fi
 
-exec bats --print-output-on-failure "${resolved[@]}"
+parallel_jobs="${BATS_NUMBER_OF_PARALLEL_JOBS:-1}"
+pending_jobs_value=false
+for arg in ${args[@]+"${args[@]}"}; do
+  if $pending_jobs_value; then
+    parallel_jobs="$arg"
+    pending_jobs_value=false
+    continue
+  fi
+
+  case "$arg" in
+    -j|--jobs) pending_jobs_value=true ;;
+    -j[0-9]*) parallel_jobs="${arg#-j}" ;;
+    --jobs=*) parallel_jobs="${arg#*=}" ;;
+  esac
+done
+
+if [[ "$parallel_jobs" =~ ^[0-9]+$ ]] && [ "$parallel_jobs" -gt 1 ]; then
+  needs_across_file_fallback=false
+  has_across_file_fallback=false
+  [[ "$MISE_CONFIG_ROOT" =~ [[:space:]] ]] && needs_across_file_fallback=true
+  for arg in ${resolved[@]+"${resolved[@]}"}; do
+    [[ "$arg" =~ [[:space:]] ]] && needs_across_file_fallback=true
+    [ "$arg" = --no-parallelize-across-files ] && has_across_file_fallback=true
+  done
+
+  if $needs_across_file_fallback && ! $has_across_file_fallback; then
+    resolved=(--no-parallelize-across-files ${resolved[@]+"${resolved[@]}"})
+  fi
+fi
+
+if [ -n "${BATS_COMMAND:-}" ]; then
+  exec "$BATS_COMMAND" --print-output-on-failure ${resolved[@]+"${resolved[@]}"}
+else
+  exec bats --print-output-on-failure ${resolved[@]+"${resolved[@]}"}
+fi
