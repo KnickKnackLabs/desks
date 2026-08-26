@@ -1,74 +1,15 @@
 #!/usr/bin/env bash
 #MISE description="Run BATS tests"
 #MISE dir="{{config_root}}"
-#USAGE arg "[args]" default="" var=#true help="Test suites or bats arguments"
-#USAGE example "mise run test" header="Run all tests"
-#USAGE example "mise run test skeleton" header="Run a specific suite by name"
+#USAGE arg "[args]" default="" var=#true help="Test files, directories, or BATS arguments"
+#USAGE example "mise run test" header="Run tests concurrently across and within files"
+#USAGE example "mise run test test/skeleton.bats" header="Run a specific test file"
 #USAGE example "mise run test --filter doctor" header="Filter tests by name"
-#USAGE example "mise run test --jobs 4" header="Run isolated tests in parallel"
+#USAGE example "mise run test --jobs 1" header="Run serially for debugging"
 set -euo pipefail
 
-TEST_DIR="$MISE_CONFIG_ROOT/test"
-parallel_command="${RUSH_COMMAND:-rush}"
-export BATS_PARALLEL_BINARY_NAME="${BATS_PARALLEL_BINARY_NAME:-$parallel_command}"
+export BATS_DEFAULT_TEST_TARGET="$MISE_CONFIG_ROOT/test"
+export BATS_NUMBER_OF_PARALLEL_JOBS="${BATS_NUMBER_OF_PARALLEL_JOBS:-4}"
+export BATS_PARALLEL_BINARY_NAME="${BATS_PARALLEL_BINARY_NAME:-rush}"
 
-args=()
-if [ -n "${usage_args:-}" ]; then
-  while IFS= read -r arg; do
-    [ -z "$arg" ] && continue
-    args+=("$arg")
-  done < <(printf '%s' "${usage_args}" | xargs printf '%s\n')
-fi
-
-resolved=()
-has_target=false
-
-for arg in ${args[@]+"${args[@]}"}; do
-  if [[ "$arg" != -* && "$arg" != *.bats && -f "$TEST_DIR/$arg.bats" ]]; then
-    resolved+=("$TEST_DIR/$arg.bats")
-    has_target=true
-  else
-    [[ "$arg" == *.bats || -d "$arg" ]] && has_target=true
-    resolved+=("$arg")
-  fi
-done
-
-if ! $has_target; then
-  resolved+=("$TEST_DIR/")
-fi
-
-parallel_jobs="${BATS_NUMBER_OF_PARALLEL_JOBS:-1}"
-pending_jobs_value=false
-for arg in ${args[@]+"${args[@]}"}; do
-  if $pending_jobs_value; then
-    parallel_jobs="$arg"
-    pending_jobs_value=false
-    continue
-  fi
-
-  case "$arg" in
-    -j|--jobs) pending_jobs_value=true ;;
-    -j[0-9]*) parallel_jobs="${arg#-j}" ;;
-    --jobs=*) parallel_jobs="${arg#*=}" ;;
-  esac
-done
-
-if [[ "$parallel_jobs" =~ ^[0-9]+$ ]] && [ "$parallel_jobs" -gt 1 ]; then
-  needs_across_file_fallback=false
-  has_across_file_fallback=false
-  [[ "$MISE_CONFIG_ROOT" =~ [[:space:]] ]] && needs_across_file_fallback=true
-  for arg in ${resolved[@]+"${resolved[@]}"}; do
-    [[ "$arg" =~ [[:space:]] ]] && needs_across_file_fallback=true
-    [ "$arg" = --no-parallelize-across-files ] && has_across_file_fallback=true
-  done
-
-  if $needs_across_file_fallback && ! $has_across_file_fallback; then
-    resolved=(--no-parallelize-across-files ${resolved[@]+"${resolved[@]}"})
-  fi
-fi
-
-if [ -n "${BATS_COMMAND:-}" ]; then
-  exec "$BATS_COMMAND" --print-output-on-failure ${resolved[@]+"${resolved[@]}"}
-else
-  exec bats --print-output-on-failure ${resolved[@]+"${resolved[@]}"}
-fi
+exec bats --print-output-on-failure "$@"
